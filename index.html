@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" onload="onGoogleLibraryLoad()" async defer></script>
 <style>
   :root {
     --bg: #F5F1E8;
@@ -109,10 +110,86 @@
     margin-top: 4px;
   }
 
+  /* ===== Sync UI ===== */
+  .header-right {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .sync-area {
+    display: flex;
+    align-items: center;
+  }
+  .sync-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px 7px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .sync-pill .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted-2);
+    flex-shrink: 0;
+  }
+  .sync-pill.synced { border-color: var(--green-soft); }
+  .sync-pill.synced .dot { background: var(--green); }
+  .sync-pill.syncing .dot { background: var(--blue); animation: pulse 1.2s ease-in-out infinite; }
+  .sync-pill.error { border-color: var(--accent-soft); }
+  .sync-pill.error .dot { background: var(--accent); }
+  .sync-pill.offline .dot { background: var(--muted); }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+  .sync-text { color: var(--ink-2); font-weight: 500; }
+  .sync-pill .signout {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 2px 4px 2px 8px;
+    margin-left: 2px;
+    border-left: 1px solid var(--border);
+    font-size: 14px;
+    line-height: 1;
+  }
+  .sync-pill .signout:hover { color: var(--accent); }
+
+  .signin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 100px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+  .signin-btn:hover {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .signin-btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
   /* ===== Toolbar ===== */
   .toolbar {
     display: grid;
-    grid-template-columns: 1fr auto auto auto auto;
+    grid-template-columns: 1fr auto auto auto auto auto;
     gap: 10px;
     margin-bottom: 16px;
     align-items: center;
@@ -736,7 +813,9 @@
     .toolbar {
       grid-template-columns: 1fr;
     }
+    .header-right { width: 100%; flex-direction: column; align-items: stretch; gap: 16px; }
     .head-stats { width: 100%; justify-content: space-between; }
+    .sync-area { justify-content: flex-start; }
     header.app-header h1 { font-size: 30px; }
     .article-head { flex-direction: column; }
     .modal-body { padding: 20px; }
@@ -752,7 +831,10 @@
       <h1>Архив <em>статей</em></h1>
       <div class="subtitle">Учёт публикаций · авторы · оплата · статусы</div>
     </div>
-    <div class="head-stats" id="head-stats"></div>
+    <div class="header-right">
+      <div class="sync-area" id="sync-area"></div>
+      <div class="head-stats" id="head-stats"></div>
+    </div>
   </header>
 
   <div class="toolbar">
@@ -765,6 +847,10 @@
     <select class="filter" id="filter-status">
       <option value="">Все статусы</option>
     </select>
+    <button class="btn btn-ghost btn-icon" id="btn-backup" title="Резервная копия">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
+      Резерв
+    </button>
     <button class="btn btn-ghost btn-icon" id="btn-export" title="Экспорт в CSV">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Экспорт
@@ -872,6 +958,48 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Backup modal -->
+<div class="modal-overlay" id="backup-overlay">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width: 560px;">
+    <div class="modal-header">
+      <h2>Резервная копия</h2>
+      <button class="modal-close" id="backup-close" aria-label="Закрыть">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; flex-direction: column; gap: 22px;">
+
+        <div>
+          <div class="section-label">Скачать копию</div>
+          <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.55;">
+            Сохраните JSON-файл со всеми вашими статьями, авторами и настройками. Положите его, например, на Google Drive — это ваша страховка на случай очистки браузера или смены устройства.
+          </p>
+          <button class="btn btn-primary btn-icon" id="btn-download-backup">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Скачать backup.json
+          </button>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 22px;">
+          <div class="section-label">Восстановить из копии</div>
+          <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.55;">
+            Загрузите ранее сохранённый <code style="background:var(--bg); padding:1px 5px; border-radius:3px; font-family:'JetBrains Mono', monospace; font-size:12px;">backup.json</code>. Это <strong>заменит</strong> текущие данные на этом устройстве.
+          </p>
+          <input type="file" id="backup-file-input" accept=".json,application/json" style="display: none;">
+          <button class="btn btn-icon" id="btn-upload-backup">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Выбрать файл…
+          </button>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 18px; font-size: 12px; color: var(--muted-2); line-height: 1.6;">
+          💡 <strong>Совет:</strong> если вы вошли через Google, данные автоматически синхронизируются с Drive. Резервная копия — это ручная страховка на случай, если что-то пойдёт не так с облаком, или для переноса между разными аккаунтами.
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -922,28 +1050,373 @@ const state = {
   loading: true
 };
 
-// ============= Storage =============
-async function loadAll() {
+// ============= Google Drive Sync Config =============
+const GOOGLE_CONFIG = {
+  clientId: '309910377706-mfmpov7sj6d2navbs0l23buo6m7lbhck.apps.googleusercontent.com',
+  scope: 'https://www.googleapis.com/auth/drive.file',
+  fileName: 'article-tracker-data.json',
+  signedInKey: 'google_signed_in_v1',
+  modifiedKey: 'local_modified_v1'
+};
+
+const sync = {
+  tokenClient: null,
+  ready: false,
+  accessToken: null,
+  tokenExpiresAt: 0,
+  fileId: null,
+  status: 'idle',  // idle | syncing | synced | error | offline
+  message: '',
+  pushTimer: null,
+  refreshTimer: null,
+  enabled: false,
+  initialSyncDone: false
+};
+
+// ============= Storage (local) =============
+function loadAll() {
   try {
-    const r = await window.storage.get(STORAGE_KEY);
-    state.articles = r ? JSON.parse(r.value) : [];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state.articles = raw ? JSON.parse(raw) : [];
   } catch (e) { state.articles = []; }
   try {
-    const r = await window.storage.get(AREAS_KEY);
-    state.areas = r ? JSON.parse(r.value) : [...DEFAULT_AREAS];
+    const raw = localStorage.getItem(AREAS_KEY);
+    state.areas = raw ? JSON.parse(raw) : [...DEFAULT_AREAS];
   } catch (e) { state.areas = [...DEFAULT_AREAS]; }
   state.loading = false;
 }
-async function saveArticles() {
-  try {
-    await window.storage.set(STORAGE_KEY, JSON.stringify(state.articles));
-  } catch (e) { toast('Ошибка сохранения: ' + e.message); }
+function saveArticlesLocal() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.articles)); }
+  catch (e) { toast('Ошибка локального сохранения'); }
 }
-async function saveAreas() {
-  try {
-    await window.storage.set(AREAS_KEY, JSON.stringify(state.areas));
-  } catch (e) { toast('Ошибка сохранения списка областей'); }
+function saveAreasLocal() {
+  try { localStorage.setItem(AREAS_KEY, JSON.stringify(state.areas)); }
+  catch (e) {}
 }
+function getLocalModified() {
+  return parseInt(localStorage.getItem(GOOGLE_CONFIG.modifiedKey) || '0', 10);
+}
+function setLocalModified(t) {
+  localStorage.setItem(GOOGLE_CONFIG.modifiedKey, String(t));
+}
+
+// Public save functions: write locally + schedule cloud push
+function saveArticles() {
+  saveArticlesLocal();
+  setLocalModified(Date.now());
+  schedulePush();
+}
+function saveAreas() {
+  saveAreasLocal();
+  setLocalModified(Date.now());
+  schedulePush();
+}
+
+// ============= Google Drive Sync =============
+window.onGoogleLibraryLoad = function() {
+  try {
+    sync.tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CONFIG.clientId,
+      scope: GOOGLE_CONFIG.scope,
+      callback: handleTokenResponse,
+      error_callback: handleTokenError
+    });
+    sync.ready = true;
+    // Auto re-auth if user was signed in last time
+    if (localStorage.getItem(GOOGLE_CONFIG.signedInKey) === 'yes') {
+      sync.enabled = true;
+      setTimeout(() => sync.tokenClient.requestAccessToken({ prompt: '' }), 200);
+    }
+    renderSyncUI();
+  } catch (e) {
+    console.error('Google init error', e);
+    setSyncStatus('error', 'Ошибка инициализации Google');
+    renderSyncUI();
+  }
+};
+
+function handleTokenResponse(resp) {
+  if (resp.error) return handleTokenError(resp);
+  sync.accessToken = resp.access_token;
+  sync.tokenExpiresAt = Date.now() + ((resp.expires_in || 3600) - 60) * 1000;
+  sync.enabled = true;
+  localStorage.setItem(GOOGLE_CONFIG.signedInKey, 'yes');
+  scheduleTokenRefresh();
+  if (!sync.initialSyncDone) {
+    performInitialSync();
+  } else {
+    setSyncStatus('synced');
+    renderSyncUI();
+  }
+}
+
+function handleTokenError(err) {
+  console.warn('Token error:', err);
+  sync.accessToken = null;
+  if (err && err.type === 'popup_closed') {
+    if (sync.enabled && !sync.initialSyncDone) {
+      // silent attempt failed, user needs to click sign-in
+      sync.enabled = false;
+      localStorage.removeItem(GOOGLE_CONFIG.signedInKey);
+      setSyncStatus('idle');
+    } else {
+      setSyncStatus('error', 'Окно входа закрыто');
+    }
+  } else {
+    setSyncStatus('error', 'Не удалось войти');
+  }
+  renderSyncUI();
+}
+
+function signIn() {
+  if (!sync.ready) return toast('Google ещё загружается, попробуйте через секунду');
+  sync.tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function signOut() {
+  if (!confirm('Выйти из Google? Локальные данные на этом устройстве сохранятся.')) return;
+  if (sync.accessToken) {
+    try { google.accounts.oauth2.revoke(sync.accessToken, () => {}); } catch (e) {}
+  }
+  sync.accessToken = null;
+  sync.fileId = null;
+  sync.enabled = false;
+  sync.initialSyncDone = false;
+  clearTimeout(sync.refreshTimer);
+  clearTimeout(sync.pushTimer);
+  localStorage.removeItem(GOOGLE_CONFIG.signedInKey);
+  setSyncStatus('idle');
+  renderSyncUI();
+  toast('Вы вышли');
+}
+
+function scheduleTokenRefresh() {
+  clearTimeout(sync.refreshTimer);
+  const ms = sync.tokenExpiresAt - Date.now();
+  if (ms > 0) {
+    sync.refreshTimer = setTimeout(() => {
+      if (sync.enabled && sync.tokenClient) {
+        sync.tokenClient.requestAccessToken({ prompt: '' });
+      }
+    }, ms);
+  }
+}
+
+// --- Drive HTTP wrapper ---
+async function driveFetch(url, options = {}) {
+  if (!sync.accessToken) throw new Error('Not signed in');
+  const headers = Object.assign({}, options.headers || {}, {
+    Authorization: 'Bearer ' + sync.accessToken
+  });
+  const res = await fetch(url, Object.assign({}, options, { headers }));
+  if (res.status === 401) {
+    sync.accessToken = null;
+    if (sync.enabled && sync.tokenClient) {
+      sync.tokenClient.requestAccessToken({ prompt: '' });
+    }
+    throw new Error('Auth expired');
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error('HTTP ' + res.status + ' ' + text.slice(0, 120));
+  }
+  return res;
+}
+
+async function findDataFile() {
+  const q = encodeURIComponent("name='" + GOOGLE_CONFIG.fileName + "' and trashed=false");
+  const url = 'https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name,modifiedTime)&pageSize=10';
+  const res = await driveFetch(url);
+  const data = await res.json();
+  return (data.files && data.files[0]) || null;
+}
+
+async function downloadDataFile(fileId) {
+  const url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media';
+  const res = await driveFetch(url);
+  return await res.json();
+}
+
+async function uploadDataFile(fileId, payload) {
+  const content = JSON.stringify(payload);
+  if (fileId) {
+    const url = 'https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media';
+    const res = await driveFetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: content
+    });
+    return await res.json();
+  } else {
+    const metadata = { name: GOOGLE_CONFIG.fileName, mimeType: 'application/json' };
+    const boundary = '-------314159265358979323846';
+    const delim = '\r\n--' + boundary + '\r\n';
+    const close = '\r\n--' + boundary + '--';
+    const body = delim
+      + 'Content-Type: application/json\r\n\r\n'
+      + JSON.stringify(metadata)
+      + delim
+      + 'Content-Type: application/json\r\n\r\n'
+      + content
+      + close;
+    const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+    const res = await driveFetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
+      body: body
+    });
+    return await res.json();
+  }
+}
+
+// --- Sync orchestration ---
+async function performInitialSync() {
+  setSyncStatus('syncing', 'Синхронизация…');
+  renderSyncUI();
+  try {
+    const file = await findDataFile();
+    if (file) {
+      sync.fileId = file.id;
+      const drive = await downloadDataFile(file.id);
+      const driveTime = (drive && drive._meta && drive._meta.savedAt) || 0;
+      const localTime = getLocalModified();
+
+      if (state.articles.length === 0 && Array.isArray(drive.articles)) {
+        // Empty local, take everything from drive
+        applyDriveData(drive);
+        toast('Загружено с Drive: ' + state.articles.length + ' статей');
+      } else if (driveTime > localTime) {
+        // Drive newer
+        const driveCount = (drive.articles || []).length;
+        const localCount = state.articles.length;
+        if (localCount > 0 && driveCount !== localCount) {
+          if (!confirm('На Google Drive более свежие данные (' + driveCount + ' статей).\nЗаменить локальные (' + localCount + ' статей)?\n\nНажмите «Отмена», чтобы оставить локальные и перезаписать Drive.')) {
+            await pushToDrive();
+            sync.initialSyncDone = true;
+            setSyncStatus('synced');
+            renderSyncUI();
+            return;
+          }
+        }
+        applyDriveData(drive);
+      } else if (localTime > driveTime) {
+        await pushToDrive();
+      }
+      setSyncStatus('synced');
+    } else {
+      // No file yet — create if there's local data
+      if (state.articles.length > 0) {
+        await pushToDrive();
+      }
+      setSyncStatus('synced');
+    }
+    sync.initialSyncDone = true;
+  } catch (err) {
+    console.error('Initial sync failed:', err);
+    setSyncStatus('error', 'Ошибка синхронизации');
+  }
+  renderSyncUI();
+}
+
+function applyDriveData(drive) {
+  if (Array.isArray(drive.articles)) state.articles = drive.articles;
+  if (Array.isArray(drive.areas) && drive.areas.length) state.areas = drive.areas;
+  saveArticlesLocal();
+  saveAreasLocal();
+  if (drive._meta && drive._meta.savedAt) setLocalModified(drive._meta.savedAt);
+  render();
+}
+
+function schedulePush() {
+  if (!sync.enabled || !sync.accessToken || !sync.initialSyncDone) return;
+  clearTimeout(sync.pushTimer);
+  setSyncStatus('syncing', 'Сохранение…');
+  renderSyncUI();
+  sync.pushTimer = setTimeout(pushToDrive, 1500);
+}
+
+async function pushToDrive() {
+  if (!sync.accessToken) return;
+  try {
+    const payload = {
+      _meta: { savedAt: Date.now(), version: 1, app: 'article-tracker' },
+      articles: state.articles,
+      areas: state.areas
+    };
+    const result = await uploadDataFile(sync.fileId, payload);
+    if (result && result.id) sync.fileId = result.id;
+    setLocalModified(payload._meta.savedAt);
+    setSyncStatus('synced');
+  } catch (err) {
+    console.error('Push failed:', err);
+    setSyncStatus('error', 'Не сохранено в Drive');
+  }
+  renderSyncUI();
+}
+
+function setSyncStatus(status, message) {
+  sync.status = status;
+  sync.message = message || '';
+}
+
+function renderSyncUI() {
+  const el = $('#sync-area');
+  if (!el) return;
+
+  // Library not loaded yet
+  if (!sync.ready) {
+    el.innerHTML = '<div class="sync-pill"><span class="dot"></span><span class="sync-text" style="color:var(--muted-2);">Загрузка Google…</span></div>';
+    return;
+  }
+
+  // Not signed in
+  if (!sync.enabled || !sync.accessToken) {
+    el.innerHTML = `
+      <button class="signin-btn" id="btn-google-signin">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Войти через Google
+      </button>`;
+    $('#btn-google-signin').addEventListener('click', signIn);
+    return;
+  }
+
+  // Signed in
+  let label, cls;
+  switch (sync.status) {
+    case 'syncing': label = sync.message || 'Синхронизация…'; cls = 'syncing'; break;
+    case 'synced':  label = 'Синхронизировано'; cls = 'synced'; break;
+    case 'error':   label = sync.message || 'Ошибка'; cls = 'error'; break;
+    case 'offline': label = 'Не в сети'; cls = 'offline'; break;
+    default:        label = 'Подключено'; cls = '';
+  }
+  el.innerHTML = `
+    <div class="sync-pill ${cls}">
+      <span class="dot"></span>
+      <span class="sync-text">${escapeHtml(label)}</span>
+      <button class="signout" id="btn-google-signout" title="Выйти из Google">⏻</button>
+    </div>`;
+  $('#btn-google-signout').addEventListener('click', signOut);
+}
+
+// Online/offline detection
+window.addEventListener('online', () => {
+  if (sync.enabled && sync.accessToken && sync.status === 'offline') {
+    setSyncStatus('syncing', 'Восстановление связи…');
+    renderSyncUI();
+    pushToDrive();
+  }
+});
+window.addEventListener('offline', () => {
+  if (sync.enabled) {
+    setSyncStatus('offline');
+    renderSyncUI();
+  }
+});
 
 // ============= Utilities =============
 const $ = sel => document.querySelector(sel);
@@ -1458,6 +1931,58 @@ function exportCSV() {
   toast(`Экспортировано: ${list.length}`);
 }
 
+// ============= Backup / Restore =============
+function downloadBackup() {
+  const data = {
+    _meta: {
+      app: 'article-tracker',
+      version: 1,
+      exportedAt: new Date().toISOString()
+    },
+    articles: state.articles,
+    areas: state.areas
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `article-tracker-backup-${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`Скачано: ${state.articles.length} статей`);
+}
+
+function restoreBackup(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || !Array.isArray(data.articles)) {
+        throw new Error('Неверный формат файла');
+      }
+      const count = data.articles.length;
+      if (!confirm(`В файле найдено ${count} статей.\nЭто заменит все текущие данные на этом устройстве.\n\nПродолжить?`)) return;
+      state.articles = data.articles;
+      if (Array.isArray(data.areas) && data.areas.length) {
+        state.areas = data.areas;
+        saveAreas();
+      }
+      saveArticles();
+      hideBackupModal();
+      render();
+      toast(`Восстановлено: ${count} статей`);
+    } catch (err) {
+      alert('Не удалось загрузить файл: ' + err.message);
+    }
+  };
+  reader.onerror = () => alert('Ошибка чтения файла');
+  reader.readAsText(file);
+}
+
+function showBackupModal() { $('#backup-overlay').classList.add('open'); }
+function hideBackupModal() { $('#backup-overlay').classList.remove('open'); }
+
 // ============= Clipboard =============
 async function copyToClipboard(text, label) {
   try {
@@ -1484,6 +2009,20 @@ function bindEvents() {
   $('#btn-add').addEventListener('click', openAddModal);
   $('#btn-export').addEventListener('click', exportCSV);
 
+  // Backup
+  $('#btn-backup').addEventListener('click', showBackupModal);
+  $('#backup-close').addEventListener('click', hideBackupModal);
+  $('#btn-download-backup').addEventListener('click', downloadBackup);
+  $('#btn-upload-backup').addEventListener('click', () => $('#backup-file-input').click());
+  $('#backup-file-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) restoreBackup(file);
+    e.target.value = '';
+  });
+  $('#backup-overlay').addEventListener('click', e => {
+    if (e.target === $('#backup-overlay')) hideBackupModal();
+  });
+
   $('#modal-close').addEventListener('click', hideModal);
   $('#btn-cancel').addEventListener('click', hideModal);
   $('#btn-save').addEventListener('click', saveFromForm);
@@ -1505,7 +2044,10 @@ function bindEvents() {
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && $('#modal-overlay').classList.contains('open')) hideModal();
+    if (e.key === 'Escape') {
+      if ($('#modal-overlay').classList.contains('open')) hideModal();
+      if ($('#backup-overlay').classList.contains('open')) hideBackupModal();
+    }
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && $('#modal-overlay').classList.contains('open')) {
       e.preventDefault();
       saveFromForm();
@@ -1514,10 +2056,11 @@ function bindEvents() {
 }
 
 // ============= Init =============
-(async function init() {
+(function init() {
   bindEvents();
-  await loadAll();
+  loadAll();
   render();
+  renderSyncUI();
 })();
 </script>
 </body>
