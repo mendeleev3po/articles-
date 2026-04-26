@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Архив статей</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F1E8;
+    --surface: #FCFAF4;
+    --surface-2: #FFFFFF;
+    --border: #DDD5C5;
+    --border-strong: #B8AE9A;
+    --ink: #1C1917;
+    --ink-2: #3A3530;
+    --muted: #6B645A;
+    --muted-2: #918A7E;
+    --accent: #7A2E1B;
+    --accent-soft: #F2E4DD;
+    --gold: #8A6E2C;
+    --gold-soft: #F0E6CD;
+    --green: #2F5238;
+    --green-soft: #DCE7DC;
+    --blue: #2A4A66;
+    --blue-soft: #DCE5EE;
+    --slate: #4A4F5A;
+    --slate-soft: #E2E3E6;
+    --shadow: 0 1px 2px rgba(28, 25, 23, 0.04), 0 4px 16px rgba(28, 25, 23, 0.04);
+    --shadow-lg: 0 4px 12px rgba(28, 25, 23, 0.08), 0 16px 48px rgba(28, 25, 23, 0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(122, 46, 27, 0.025) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(42, 74, 102, 0.02) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  .app {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 28px 80px;
+  }
+
+  /* ===== Header ===== */
+  header.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  header.app-header h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 38px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-variation-settings: 'opsz' 144;
+  }
+  header.app-header h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  header .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+  .head-stats {
+    display: flex;
+    gap: 28px;
+    align-items: flex-end;
+  }
+  .head-stat {
+    text-align: right;
+  }
+  .head-stat .num {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+    font-variation-settings: 'opsz' 144;
+  }
+  .head-stat .lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ===== Toolbar ===== */
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  .search {
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    padding: 11px 14px 11px 38px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(122, 46, 27, 0.1);
+  }
+  .search::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B645A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  select.filter, .btn {
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  select.filter:hover, .btn:hover {
+    border-color: var(--border-strong);
+  }
+  select.filter:focus { outline: none; border-color: var(--accent); }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--surface);
+    border-color: var(--ink);
+    font-weight: 500;
+  }
+  .btn-primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border);
+  }
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-icon svg {
+    width: 15px; height: 15px;
+  }
+
+  /* ===== Quick filters ===== */
+  .quick-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding-bottom: 4px;
+  }
+  .chip {
+    padding: 7px 13px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chip:hover { border-color: var(--border-strong); background: var(--surface); }
+  .chip.active {
+    background: var(--ink);
+    color: var(--surface);
+    border-color: var(--ink);
+  }
+  .chip .count {
+    background: rgba(255,255,255,0.18);
+    padding: 1px 7px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .chip:not(.active) .count {
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  /* ===== Articles list ===== */
+  .articles {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .article-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    transition: border-color 0.15s, transform 0.15s;
+    cursor: pointer;
+  }
+  .article-card:hover {
+    border-color: var(--border-strong);
+  }
+  .article-card.expanded {
+    border-color: var(--ink);
+    box-shadow: var(--shadow);
+    cursor: default;
+  }
+  .article-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .article-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    color: var(--ink);
+    font-variation-settings: 'opsz' 36;
+    flex: 1;
+  }
+  .article-meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .article-meta > * {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .area-tag {
+    padding: 3px 10px;
+    background: var(--bg);
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .corresponding-badge {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .pay-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .pay-status.unpaid {
+    color: var(--accent);
+  }
+  .pay-status.paid {
+    color: var(--green);
+  }
+
+  /* Status badge */
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status-idea { background: var(--gold-soft); color: var(--gold); }
+  .status-todo { background: var(--slate-soft); color: var(--slate); }
+  .status-writing { background: var(--blue-soft); color: var(--blue); }
+  .status-written { background: var(--blue-soft); color: var(--blue); }
+  .status-translating { background: var(--blue-soft); color: var(--blue); }
+  .status-translated { background: var(--blue-soft); color: var(--blue); }
+  .status-submitted { background: var(--gold-soft); color: var(--gold); }
+  .status-review { background: var(--gold-soft); color: var(--gold); }
+  .status-accepted { background: var(--green-soft); color: var(--green); }
+  .status-published { background: var(--green-soft); color: var(--green); }
+  .status-rejected { background: var(--accent-soft); color: var(--accent); }
+  .status-archive { background: var(--slate-soft); color: var(--muted); }
+
+  /* Expanded article details */
+  .article-details {
+    display: none;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border);
+  }
+  .article-card.expanded .article-details { display: block; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 28px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 700px) {
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+  .detail-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .detail-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-2);
+    font-weight: 500;
+  }
+  .detail-value {
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .detail-value.mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--bg);
+    padding: 7px 10px;
+    border-radius: 6px;
+    word-break: break-all;
+  }
+  .detail-value a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+  .author-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .author-item {
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .author-item .corresp {
+    font-size: 11px;
+    margin-left: 6px;
+    padding: 1px 7px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 100px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .alt-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .alt-title-item {
+    font-size: 13px;
+    color: var(--muted);
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+    font-style: italic;
+  }
+  .alt-title-item .reason {
+    color: var(--muted-2);
+    font-size: 12px;
+    font-style: normal;
+    margin-top: 2px;
+  }
+  .password-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .password-row .toggle-pw {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 4px;
+    font-size: 12px;
+  }
+  .password-row .toggle-pw:hover { color: var(--accent); }
+
+  .article-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+  }
+  .article-actions .btn {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  .btn-danger {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+  }
+  .btn-danger:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  .notes-block {
+    grid-column: 1 / -1;
+  }
+  .notes-block .detail-value {
+    background: var(--bg);
+    padding: 12px 14px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+
+  /* ===== Empty state ===== */
+  .empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+  }
+  .empty h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 24px;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+  }
+  .empty p { font-size: 14px; }
+
+  /* ===== Modal ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 25, 23, 0.4);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    z-index: 100;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface-2);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 720px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .modal-header {
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 6px;
+    font-size: 22px;
+    line-height: 1;
+    border-radius: 6px;
+  }
+  .modal-close:hover { background: var(--bg); color: var(--ink); }
+  .modal-body {
+    padding: 24px 28px;
+  }
+  .modal-footer {
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  /* Form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+  }
+  .form-row { grid-column: 1 / -1; }
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .field label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .field input, .field select, .field textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(122, 46, 27, 0.08);
+  }
+  .field textarea {
+    min-height: 80px;
+    resize: vertical;
+    font-family: inherit;
+  }
+  .field-mono input { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+  .field-with-add {
+    display: flex;
+    gap: 6px;
+  }
+  .field-with-add select { flex: 1; }
+  .field-with-add button {
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--muted);
+  }
+  .field-with-add button:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Authors editor */
+  .authors-editor, .alt-titles-editor {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 4px;
+  }
+  .author-row, .alt-title-row {
+    display: grid;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+  }
+  .author-row {
+    grid-template-columns: 1fr auto auto;
+  }
+  .alt-title-row {
+    grid-template-columns: 1fr 1fr auto;
+  }
+  .author-row input[type="text"], .alt-title-row input[type="text"] {
+    border: 1px solid transparent;
+    background: var(--surface-2);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .author-row input[type="text"]:focus, .alt-title-row input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .corresp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--muted);
+    user-select: none;
+    white-space: nowrap;
+  }
+  .corresp-toggle:hover { background: var(--bg); }
+  .corresp-toggle input { display: none; }
+  .corresp-toggle .check {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--surface);
+    background: var(--surface-2);
+  }
+  .corresp-toggle input:checked ~ .check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .corresp-toggle input:checked ~ .check::after {
+    content: '✓';
+  }
+  .corresp-toggle input:checked ~ span:not(.check) {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .row-remove {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .row-remove:hover {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+    background: var(--accent-soft);
+  }
+
+  .add-row-btn {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .add-row-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--surface);
+    padding: 11px 18px;
+    border-radius: 100px;
+    font-size: 13px;
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Utility */
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .section-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 700px) {
+    .toolbar {
+      grid-template-columns: 1fr;
+    }
+    .head-stats { width: 100%; justify-content: space-between; }
+    header.app-header h1 { font-size: 30px; }
+    .article-head { flex-direction: column; }
+    .modal-body { padding: 20px; }
+    .modal-header { padding: 18px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="app-header">
+    <div>
+      <h1>Архив <em>статей</em></h1>
+      <div class="subtitle">Учёт публикаций · авторы · оплата · статусы</div>
+    </div>
+    <div class="head-stats" id="head-stats"></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search">
+      <input type="text" id="search" placeholder="Поиск по названию, автору, изданию…">
+    </div>
+    <select class="filter" id="filter-area">
+      <option value="">Все области</option>
+    </select>
+    <select class="filter" id="filter-status">
+      <option value="">Все статусы</option>
+    </select>
+    <button class="btn btn-ghost btn-icon" id="btn-export" title="Экспорт в CSV">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Экспорт
+    </button>
+    <button class="btn btn-primary btn-icon" id="btn-add">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Новая статья
+    </button>
+  </div>
+
+  <div class="quick-filters" id="quick-filters"></div>
+
+  <div class="articles" id="articles"></div>
+
+</div>
+
+<!-- Article modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 id="modal-title">Новая статья</h2>
+      <button class="modal-close" id="modal-close" aria-label="Закрыть">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="article-form">
+        <div class="form-grid">
+
+          <div class="field form-row">
+            <label for="f-title">Название</label>
+            <input type="text" id="f-title" required placeholder="Введите название статьи">
+          </div>
+
+          <div class="field">
+            <label for="f-area">Область</label>
+            <div class="field-with-add">
+              <select id="f-area"></select>
+              <button type="button" id="add-area-btn" title="Добавить новую область">+</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-status">Статус</label>
+            <select id="f-status"></select>
+          </div>
+
+          <div class="field">
+            <label for="f-publication">Журнал / издание</label>
+            <input type="text" id="f-publication" placeholder="Например, Вестник МГУ">
+          </div>
+
+          <div class="field field-mono">
+            <label for="f-url">Ссылка на сайт</label>
+            <input type="url" id="f-url" placeholder="https://...">
+          </div>
+
+          <div class="field field-mono">
+            <label for="f-login">Логин</label>
+            <input type="text" id="f-login" autocomplete="off">
+          </div>
+
+          <div class="field field-mono">
+            <label for="f-password">Пароль</label>
+            <input type="text" id="f-password" autocomplete="off">
+          </div>
+
+          <div class="field">
+            <label for="f-cost">Стоимость публикации, ₸/₽</label>
+            <input type="number" id="f-cost" step="0.01" min="0" placeholder="0">
+          </div>
+
+          <div class="field">
+            <label for="f-paid">Оплачено, ₸/₽</label>
+            <input type="number" id="f-paid" step="0.01" min="0" placeholder="0">
+          </div>
+
+          <div class="field form-row">
+            <label>Авторы и соавторы</label>
+            <div class="hint">Отметьте галочкой, кто является корреспондирующим автором</div>
+            <div class="authors-editor" id="authors-editor"></div>
+            <button type="button" class="add-row-btn" id="add-author-btn">+ Добавить автора</button>
+          </div>
+
+          <div class="field form-row">
+            <label>Альтернативные названия (если статью отклоняли)</label>
+            <div class="hint">История попыток — название и причина / куда подавали</div>
+            <div class="alt-titles-editor" id="alt-titles-editor"></div>
+            <button type="button" class="add-row-btn" id="add-alt-title-btn">+ Добавить вариант</button>
+          </div>
+
+          <div class="field form-row">
+            <label for="f-notes">Заметки</label>
+            <textarea id="f-notes" placeholder="Любая дополнительная информация…"></textarea>
+          </div>
+
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btn-delete" style="margin-right: auto; display: none;">Удалить</button>
+      <button class="btn btn-ghost" id="btn-cancel">Отмена</button>
+      <button class="btn btn-primary" id="btn-save">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ============= Constants =============
+const STATUSES = [
+  { value: 'idea',        label: 'Идея',           cls: 'status-idea' },
+  { value: 'todo',        label: 'К написанию',    cls: 'status-todo' },
+  { value: 'writing',     label: 'Пишется',        cls: 'status-writing' },
+  { value: 'written',     label: 'Написана',       cls: 'status-written' },
+  { value: 'translating', label: 'Переводится',    cls: 'status-translating' },
+  { value: 'translated',  label: 'Переведена',     cls: 'status-translated' },
+  { value: 'submitted',   label: 'Отправлена',     cls: 'status-submitted' },
+  { value: 'review',      label: 'На рецензии',    cls: 'status-review' },
+  { value: 'accepted',    label: 'Принята',        cls: 'status-accepted' },
+  { value: 'published',   label: 'Опубликована',   cls: 'status-published' },
+  { value: 'rejected',    label: 'Отклонена',      cls: 'status-rejected' },
+  { value: 'archive',     label: 'Архив',          cls: 'status-archive' }
+];
+const STATUS_MAP = Object.fromEntries(STATUSES.map(s => [s.value, s]));
+
+const QUICK_FILTERS = [
+  { id: 'all',       label: 'Все' },
+  { id: 'todo',      label: 'Не написаны',     test: a => ['idea','todo'].includes(a.status) },
+  { id: 'progress',  label: 'В работе',        test: a => ['writing','translating'].includes(a.status) },
+  { id: 'no-translate', label: 'Без перевода', test: a => ['written'].includes(a.status) },
+  { id: 'pending',   label: 'На рассмотрении', test: a => ['submitted','review'].includes(a.status) },
+  { id: 'accepted',  label: 'Принятые',        test: a => a.status === 'accepted' },
+  { id: 'published', label: 'Опубликованные',  test: a => a.status === 'published' },
+  { id: 'rejected',  label: 'Отклонённые',     test: a => a.status === 'rejected' },
+  { id: 'unpaid',    label: 'Долги по оплате', test: a => (Number(a.cost)||0) > (Number(a.paid)||0) }
+];
+
+const DEFAULT_AREAS = ['Педагогика', 'Экономика'];
+const STORAGE_KEY = 'articles_v1';
+const AREAS_KEY = 'areas_v1';
+
+// ============= State =============
+const state = {
+  articles: [],
+  areas: [...DEFAULT_AREAS],
+  search: '',
+  filterArea: '',
+  filterStatus: '',
+  quickFilter: 'all',
+  expandedId: null,
+  editingId: null,
+  shownPasswords: new Set(),
+  loading: true
+};
+
+// ============= Storage =============
+async function loadAll() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    state.articles = r ? JSON.parse(r.value) : [];
+  } catch (e) { state.articles = []; }
+  try {
+    const r = await window.storage.get(AREAS_KEY);
+    state.areas = r ? JSON.parse(r.value) : [...DEFAULT_AREAS];
+  } catch (e) { state.areas = [...DEFAULT_AREAS]; }
+  state.loading = false;
+}
+async function saveArticles() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state.articles));
+  } catch (e) { toast('Ошибка сохранения: ' + e.message); }
+}
+async function saveAreas() {
+  try {
+    await window.storage.set(AREAS_KEY, JSON.stringify(state.areas));
+  } catch (e) { toast('Ошибка сохранения списка областей'); }
+}
+
+// ============= Utilities =============
+const $ = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function fmtMoney(n) {
+  const v = Number(n) || 0;
+  return v.toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+}
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ============= Filters =============
+function getFilteredArticles() {
+  const q = state.search.trim().toLowerCase();
+  const qf = QUICK_FILTERS.find(f => f.id === state.quickFilter);
+
+  return state.articles.filter(a => {
+    if (state.filterArea && a.area !== state.filterArea) return false;
+    if (state.filterStatus && a.status !== state.filterStatus) return false;
+    if (qf && qf.test && !qf.test(a)) return false;
+    if (q) {
+      const hay = [
+        a.title,
+        a.publication,
+        a.area,
+        ...(a.authors || []).map(au => au.name),
+        ...(a.altTitles || []).map(t => t.title + ' ' + (t.note || '')),
+        a.notes
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
+
+// ============= Rendering =============
+function render() {
+  renderHeadStats();
+  renderQuickFilters();
+  renderAreaFilter();
+  renderStatusFilter();
+  renderArticles();
+}
+
+function renderHeadStats() {
+  const total = state.articles.length;
+  const published = state.articles.filter(a => a.status === 'published').length;
+  const owed = state.articles.reduce((sum, a) => sum + Math.max(0, (Number(a.cost)||0) - (Number(a.paid)||0)), 0);
+  $('#head-stats').innerHTML = `
+    <div class="head-stat"><div class="num">${total}</div><div class="lbl">всего статей</div></div>
+    <div class="head-stat"><div class="num">${published}</div><div class="lbl">опубликовано</div></div>
+    <div class="head-stat"><div class="num">${fmtMoney(owed)}</div><div class="lbl">остаток к оплате</div></div>
+  `;
+}
+
+function renderQuickFilters() {
+  const qf = $('#quick-filters');
+  qf.innerHTML = QUICK_FILTERS.map(f => {
+    const count = f.test ? state.articles.filter(f.test).length : state.articles.length;
+    const active = state.quickFilter === f.id ? 'active' : '';
+    return `<button class="chip ${active}" data-filter="${f.id}">${escapeHtml(f.label)}<span class="count">${count}</span></button>`;
+  }).join('');
+  qf.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => {
+      state.quickFilter = c.dataset.filter;
+      render();
+    });
+  });
+}
+
+function renderAreaFilter() {
+  const sel = $('#filter-area');
+  const cur = state.filterArea;
+  sel.innerHTML = '<option value="">Все области</option>' +
+    state.areas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+  sel.value = cur;
+}
+
+function renderStatusFilter() {
+  const sel = $('#filter-status');
+  const cur = state.filterStatus;
+  sel.innerHTML = '<option value="">Все статусы</option>' +
+    STATUSES.map(s => `<option value="${s.value}">${escapeHtml(s.label)}</option>`).join('');
+  sel.value = cur;
+}
+
+function renderArticles() {
+  const list = getFilteredArticles();
+  const cont = $('#articles');
+  if (list.length === 0) {
+    if (state.articles.length === 0) {
+      cont.innerHTML = `
+        <div class="empty">
+          <h3>Пока ничего нет</h3>
+          <p>Нажмите «Новая статья», чтобы добавить первую запись.</p>
+        </div>`;
+    } else {
+      cont.innerHTML = `
+        <div class="empty">
+          <h3>Ничего не найдено</h3>
+          <p>Попробуйте изменить фильтры или поисковый запрос.</p>
+        </div>`;
+    }
+    return;
+  }
+  cont.innerHTML = list.map(a => renderCard(a)).join('');
+
+  cont.querySelectorAll('.article-card').forEach(card => {
+    const id = card.dataset.id;
+    card.addEventListener('click', e => {
+      if (e.target.closest('.article-actions') || e.target.closest('a') || e.target.closest('.toggle-pw')) return;
+      state.expandedId = state.expandedId === id ? null : id;
+      renderArticles();
+    });
+    card.querySelectorAll('.toggle-pw').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const aid = btn.dataset.aid;
+        if (state.shownPasswords.has(aid)) state.shownPasswords.delete(aid);
+        else state.shownPasswords.add(aid);
+        renderArticles();
+      });
+    });
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        const aid = btn.dataset.aid;
+        if (action === 'edit') openEditModal(aid);
+        else if (action === 'delete') deleteArticle(aid);
+        else if (action === 'copy') copyToClipboard(btn.dataset.value, btn.dataset.label || 'Скопировано');
+      });
+    });
+  });
+}
+
+function renderCard(a) {
+  const status = STATUS_MAP[a.status] || STATUSES[0];
+  const expanded = state.expandedId === a.id ? 'expanded' : '';
+  const corresp = (a.authors || []).find(au => au.isCorresponding);
+  const cost = Number(a.cost) || 0;
+  const paid = Number(a.paid) || 0;
+  const remaining = Math.max(0, cost - paid);
+  const payCls = cost > 0 ? (remaining > 0 ? 'unpaid' : 'paid') : '';
+  const payText = cost > 0
+    ? (remaining > 0 ? `${fmtMoney(paid)} / ${fmtMoney(cost)} — долг ${fmtMoney(remaining)}` : `Оплачено ${fmtMoney(cost)}`)
+    : '';
+
+  const authorsList = (a.authors || []).filter(au => au.name).map(au => `
+    <div class="author-item">
+      ${escapeHtml(au.name)}
+      ${au.isCorresponding ? '<span class="corresp">корреспондент</span>' : ''}
+    </div>`).join('') || '<div class="detail-value" style="color:var(--muted-2);">не указаны</div>';
+
+  const altList = (a.altTitles || []).filter(t => t.title).map(t => `
+    <div class="alt-title-item">
+      «${escapeHtml(t.title)}»
+      ${t.note ? `<div class="reason">${escapeHtml(t.note)}</div>` : ''}
+    </div>`).join('');
+
+  const showPw = state.shownPasswords.has(a.id);
+  const pwDisplay = a.password ? (showPw ? escapeHtml(a.password) : '••••••••') : '<span style="color:var(--muted-2);">—</span>';
+
+  return `
+    <div class="article-card ${expanded}" data-id="${a.id}">
+      <div class="article-head">
+        <div class="article-title">${escapeHtml(a.title || 'Без названия')}</div>
+        <div class="status-badge ${status.cls}">${escapeHtml(status.label)}</div>
+      </div>
+      <div class="article-meta">
+        ${a.area ? `<span class="area-tag">${escapeHtml(a.area)}</span>` : ''}
+        ${a.publication ? `<span>${escapeHtml(a.publication)}</span>` : ''}
+        ${corresp ? `<span class="corresponding-badge">✦ ${escapeHtml(corresp.name)}</span>` : ''}
+        ${payText ? `<span class="pay-status ${payCls}">${payText}</span>` : ''}
+      </div>
+      <div class="article-details">
+        <div class="detail-grid">
+          <div class="detail-block">
+            <div class="detail-label">Авторы</div>
+            <div class="author-list">${authorsList}</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">Издание</div>
+            <div class="detail-value">${a.publication ? escapeHtml(a.publication) : '<span style="color:var(--muted-2);">—</span>'}</div>
+          </div>
+          ${a.url ? `
+            <div class="detail-block">
+              <div class="detail-label">Ссылка</div>
+              <div class="detail-value mono"><a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">${escapeHtml(a.url)}</a></div>
+            </div>` : ''}
+          ${a.login ? `
+            <div class="detail-block">
+              <div class="detail-label">Логин</div>
+              <div class="detail-value mono">${escapeHtml(a.login)}
+                <button class="toggle-pw" data-action="copy" data-aid="${a.id}" data-value="${escapeHtml(a.login)}" data-label="Логин скопирован" title="Копировать">⧉</button>
+              </div>
+            </div>` : ''}
+          ${a.password ? `
+            <div class="detail-block">
+              <div class="detail-label">Пароль</div>
+              <div class="detail-value mono password-row">
+                <span>${pwDisplay}</span>
+                <button class="toggle-pw" data-aid="${a.id}" title="${showPw?'Скрыть':'Показать'}">${showPw?'🙈':'👁'}</button>
+                <button class="toggle-pw" data-action="copy" data-aid="${a.id}" data-value="${escapeHtml(a.password)}" data-label="Пароль скопирован" title="Копировать">⧉</button>
+              </div>
+            </div>` : ''}
+          ${cost > 0 ? `
+            <div class="detail-block">
+              <div class="detail-label">Оплата</div>
+              <div class="detail-value mono">
+                <strong>${fmtMoney(paid)}</strong> из ${fmtMoney(cost)}
+                ${remaining > 0 ? `<span style="color:var(--accent);"> · долг ${fmtMoney(remaining)}</span>` : ' · полностью оплачено'}
+              </div>
+            </div>` : ''}
+          ${altList ? `
+            <div class="detail-block notes-block">
+              <div class="detail-label">Альтернативные названия</div>
+              <div class="alt-titles">${altList}</div>
+            </div>` : ''}
+          ${a.notes ? `
+            <div class="detail-block notes-block">
+              <div class="detail-label">Заметки</div>
+              <div class="detail-value">${escapeHtml(a.notes)}</div>
+            </div>` : ''}
+        </div>
+        <div class="article-actions">
+          <button class="btn" data-action="edit" data-aid="${a.id}">Редактировать</button>
+          <button class="btn btn-danger" data-action="delete" data-aid="${a.id}">Удалить</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============= Modal & Form =============
+function openAddModal() {
+  state.editingId = null;
+  $('#modal-title').textContent = 'Новая статья';
+  $('#btn-delete').style.display = 'none';
+  fillForm({
+    title: '', area: state.areas[0] || '', status: 'idea', publication: '',
+    url: '', login: '', password: '', cost: '', paid: '',
+    authors: [{ name: '', isCorresponding: true }],
+    altTitles: [], notes: ''
+  });
+  showModal();
+  setTimeout(() => $('#f-title').focus(), 50);
+}
+
+function openEditModal(id) {
+  const a = state.articles.find(x => x.id === id);
+  if (!a) return;
+  state.editingId = id;
+  $('#modal-title').textContent = 'Редактирование статьи';
+  $('#btn-delete').style.display = '';
+  fillForm(a);
+  showModal();
+}
+
+function showModal() { $('#modal-overlay').classList.add('open'); }
+function hideModal() { $('#modal-overlay').classList.remove('open'); state.editingId = null; }
+
+function fillForm(a) {
+  // Area select
+  const areaSel = $('#f-area');
+  areaSel.innerHTML = state.areas.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+  if (a.area && !state.areas.includes(a.area)) {
+    areaSel.innerHTML += `<option value="${escapeHtml(a.area)}">${escapeHtml(a.area)}</option>`;
+  }
+  areaSel.value = a.area || state.areas[0] || '';
+
+  // Status select
+  const statusSel = $('#f-status');
+  statusSel.innerHTML = STATUSES.map(s => `<option value="${s.value}">${escapeHtml(s.label)}</option>`).join('');
+  statusSel.value = a.status || 'idea';
+
+  $('#f-title').value = a.title || '';
+  $('#f-publication').value = a.publication || '';
+  $('#f-url').value = a.url || '';
+  $('#f-login').value = a.login || '';
+  $('#f-password').value = a.password || '';
+  $('#f-cost').value = a.cost || '';
+  $('#f-paid').value = a.paid || '';
+  $('#f-notes').value = a.notes || '';
+
+  renderAuthorsEditor(a.authors && a.authors.length ? a.authors : [{ name: '', isCorresponding: true }]);
+  renderAltTitlesEditor(a.altTitles || []);
+}
+
+function renderAuthorsEditor(authors) {
+  const cont = $('#authors-editor');
+  cont.innerHTML = authors.map((au, i) => `
+    <div class="author-row">
+      <input type="text" placeholder="Имя автора" value="${escapeHtml(au.name||'')}" data-idx="${i}" data-field="name">
+      <label class="corresp-toggle">
+        <input type="checkbox" data-idx="${i}" data-field="isCorresponding" ${au.isCorresponding ? 'checked' : ''}>
+        <span class="check"></span>
+        <span>корреспондент</span>
+      </label>
+      <button type="button" class="row-remove" data-idx="${i}" title="Удалить">×</button>
+    </div>
+  `).join('');
+
+  cont.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const idx = +inp.dataset.idx;
+      const field = inp.dataset.field;
+      const val = inp.type === 'checkbox' ? inp.checked : inp.value;
+      const cur = readAuthorsFromForm();
+      if (field === 'isCorresponding' && val) {
+        cur.forEach((a, j) => a.isCorresponding = (j === idx));
+      } else {
+        cur[idx][field] = val;
+      }
+      renderAuthorsEditor(cur);
+    });
+  });
+  cont.querySelectorAll('.row-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.idx;
+      const cur = readAuthorsFromForm();
+      cur.splice(idx, 1);
+      if (cur.length === 0) cur.push({ name: '', isCorresponding: true });
+      if (!cur.some(a => a.isCorresponding)) cur[0].isCorresponding = true;
+      renderAuthorsEditor(cur);
+    });
+  });
+}
+
+function readAuthorsFromForm() {
+  const rows = $$('#authors-editor .author-row');
+  const arr = [];
+  rows.forEach(r => {
+    const name = r.querySelector('input[data-field="name"]').value;
+    const isCorresponding = r.querySelector('input[data-field="isCorresponding"]').checked;
+    arr.push({ name, isCorresponding });
+  });
+  return arr;
+}
+
+function renderAltTitlesEditor(items) {
+  const cont = $('#alt-titles-editor');
+  if (items.length === 0) {
+    cont.innerHTML = '<div style="padding:10px 12px; color:var(--muted-2); font-size:13px; font-style:italic;">Нет альтернативных названий. Добавьте варианты, если статью отклоняли.</div>';
+    return;
+  }
+  cont.innerHTML = items.map((t, i) => `
+    <div class="alt-title-row">
+      <input type="text" placeholder="Прежнее название" value="${escapeHtml(t.title||'')}" data-idx="${i}" data-field="title">
+      <input type="text" placeholder="Куда подавали / причина" value="${escapeHtml(t.note||'')}" data-idx="${i}" data-field="note">
+      <button type="button" class="row-remove" data-idx="${i}" title="Удалить">×</button>
+    </div>
+  `).join('');
+
+  cont.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const idx = +inp.dataset.idx;
+      const field = inp.dataset.field;
+      const cur = readAltTitlesFromForm();
+      cur[idx][field] = inp.value;
+      // No re-render needed for plain text input; just update internal state
+    });
+  });
+  cont.querySelectorAll('.row-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.idx;
+      const cur = readAltTitlesFromForm();
+      cur.splice(idx, 1);
+      renderAltTitlesEditor(cur);
+    });
+  });
+}
+
+function readAltTitlesFromForm() {
+  const rows = $$('#alt-titles-editor .alt-title-row');
+  const arr = [];
+  rows.forEach(r => {
+    const title = r.querySelector('input[data-field="title"]').value;
+    const note = r.querySelector('input[data-field="note"]').value;
+    arr.push({ title, note });
+  });
+  return arr;
+}
+
+async function saveFromForm() {
+  const title = $('#f-title').value.trim();
+  if (!title) { toast('Укажите название'); $('#f-title').focus(); return; }
+
+  const authors = readAuthorsFromForm().filter(a => a.name.trim());
+  const altTitles = readAltTitlesFromForm().filter(t => t.title.trim() || t.note.trim());
+
+  const data = {
+    title,
+    area: $('#f-area').value,
+    status: $('#f-status').value,
+    publication: $('#f-publication').value.trim(),
+    url: $('#f-url').value.trim(),
+    login: $('#f-login').value,
+    password: $('#f-password').value,
+    cost: parseFloat($('#f-cost').value) || 0,
+    paid: parseFloat($('#f-paid').value) || 0,
+    authors,
+    altTitles,
+    notes: $('#f-notes').value.trim(),
+    updatedAt: Date.now()
+  };
+
+  if (state.editingId) {
+    const idx = state.articles.findIndex(x => x.id === state.editingId);
+    if (idx >= 0) {
+      state.articles[idx] = { ...state.articles[idx], ...data };
+    }
+    toast('Изменения сохранены');
+  } else {
+    state.articles.push({ id: uid(), createdAt: Date.now(), ...data });
+    toast('Статья добавлена');
+  }
+  await saveArticles();
+  hideModal();
+  render();
+}
+
+async function deleteArticle(id) {
+  const a = state.articles.find(x => x.id === id);
+  if (!a) return;
+  if (!confirm(`Удалить статью «${a.title}»?\nЭто действие нельзя отменить.`)) return;
+  state.articles = state.articles.filter(x => x.id !== id);
+  if (state.editingId === id) hideModal();
+  await saveArticles();
+  render();
+  toast('Статья удалена');
+}
+
+// ============= Areas =============
+async function addNewArea() {
+  const name = prompt('Название новой области (например, «Лингвистика»)');
+  if (!name) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  if (state.areas.includes(trimmed)) {
+    toast('Такая область уже есть');
+    $('#f-area').value = trimmed;
+    return;
+  }
+  state.areas.push(trimmed);
+  await saveAreas();
+  // Update select in form
+  const sel = $('#f-area');
+  sel.innerHTML = state.areas.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
+  sel.value = trimmed;
+  renderAreaFilter();
+  toast('Область добавлена');
+}
+
+// ============= Export =============
+function exportCSV() {
+  const list = getFilteredArticles();
+  if (list.length === 0) { toast('Нет данных для экспорта'); return; }
+
+  const headers = [
+    'Название', 'Статус', 'Область', 'Издание',
+    'Авторы', 'Корреспондент', 'Ссылка',
+    'Логин', 'Пароль',
+    'Стоимость', 'Оплачено', 'Долг',
+    'Альтернативные названия', 'Заметки',
+    'Создано', 'Обновлено'
+  ];
+
+  const rows = list.map(a => {
+    const corresp = (a.authors||[]).find(au => au.isCorresponding);
+    const authorsStr = (a.authors||[]).map(au => au.name).filter(Boolean).join('; ');
+    const altStr = (a.altTitles||[]).map(t => t.title + (t.note ? ` (${t.note})` : '')).join(' | ');
+    const cost = Number(a.cost)||0, paid = Number(a.paid)||0;
+    return [
+      a.title, (STATUS_MAP[a.status]||{}).label || '', a.area || '', a.publication || '',
+      authorsStr, corresp ? corresp.name : '', a.url || '',
+      a.login || '', a.password || '',
+      cost ? cost.toString() : '', paid ? paid.toString() : '', Math.max(0, cost - paid).toString(),
+      altStr, a.notes || '',
+      a.createdAt ? new Date(a.createdAt).toLocaleString('ru-RU') : '',
+      a.updatedAt ? new Date(a.updatedAt).toLocaleString('ru-RU') : ''
+    ];
+  });
+
+  const csv = [headers, ...rows].map(row =>
+    row.map(cell => {
+      const s = String(cell ?? '');
+      // Escape: wrap in quotes if has comma/quote/newline; double internal quotes
+      if (/[",\n;]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }).join(',')
+  ).join('\n');
+
+  // Add BOM for Excel UTF-8
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `articles-${dateStr}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`Экспортировано: ${list.length}`);
+}
+
+// ============= Clipboard =============
+async function copyToClipboard(text, label) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(label || 'Скопировано');
+  } catch (e) {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast(label || 'Скопировано'); }
+    catch(_) { toast('Не удалось скопировать'); }
+    document.body.removeChild(ta);
+  }
+}
+
+// ============= Wire up =============
+function bindEvents() {
+  $('#search').addEventListener('input', e => { state.search = e.target.value; renderArticles(); });
+  $('#filter-area').addEventListener('change', e => { state.filterArea = e.target.value; render(); });
+  $('#filter-status').addEventListener('change', e => { state.filterStatus = e.target.value; render(); });
+
+  $('#btn-add').addEventListener('click', openAddModal);
+  $('#btn-export').addEventListener('click', exportCSV);
+
+  $('#modal-close').addEventListener('click', hideModal);
+  $('#btn-cancel').addEventListener('click', hideModal);
+  $('#btn-save').addEventListener('click', saveFromForm);
+  $('#btn-delete').addEventListener('click', () => state.editingId && deleteArticle(state.editingId));
+  $('#modal-overlay').addEventListener('click', e => {
+    if (e.target === $('#modal-overlay')) hideModal();
+  });
+
+  $('#add-area-btn').addEventListener('click', addNewArea);
+  $('#add-author-btn').addEventListener('click', () => {
+    const cur = readAuthorsFromForm();
+    cur.push({ name: '', isCorresponding: cur.length === 0 });
+    renderAuthorsEditor(cur);
+  });
+  $('#add-alt-title-btn').addEventListener('click', () => {
+    const cur = readAltTitlesFromForm();
+    cur.push({ title: '', note: '' });
+    renderAltTitlesEditor(cur);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && $('#modal-overlay').classList.contains('open')) hideModal();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && $('#modal-overlay').classList.contains('open')) {
+      e.preventDefault();
+      saveFromForm();
+    }
+  });
+}
+
+// ============= Init =============
+(async function init() {
+  bindEvents();
+  await loadAll();
+  render();
+})();
+</script>
+</body>
+</html>
